@@ -8,7 +8,7 @@ module Conversion1C
 
 
 		def initialize(data)
-			object = data.xpath('//Объект').first
+			object = data
 
 			@nth = object.attr('Нпп').to_i
 			@class_name = object.attr('Тип')
