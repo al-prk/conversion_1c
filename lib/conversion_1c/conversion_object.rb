@@ -1,3 +1,5 @@
+require 'time'
+
 module Conversion1C
 	class ConversionObject
 		attr_reader :nth
@@ -7,27 +9,24 @@ module Conversion1C
 
 		def initialize(data)
 			object = data.xpath('//Объект').first
-			# @nth = data.xpath('.//@Нпп').text.to_i
-			# @class_name = data.xpath('.//@Тип').text
-			# @rule_name = data.xpath('.//@ИмяПравила').text
 
 			@nth = object.attr('Нпп').to_i
 			@class_name = object.attr('Тип')
 			@rule_name = object.attr('ИмяПравила')
 
-			@obj = { 
-				"guid" => data.xpath('.//Ссылка/Свойство[@Имя = "{УникальныйИдентификатор}"][1]').text.strip 
+			@obj = {
+				"guid" => data.xpath('.//Ссылка/Свойство[@Имя = "{УникальныйИдентификатор}"][1]').text.strip
 			}.merge(
 				extract_properties(data)
 			).merge(
 				Hash[
 					data.xpath('.//ТабличнаяЧасть').map do |table|
 						[
-							table.attr('Имя'), 
-							table.xpath('.//Запись').map do |record|								
+							table.attr('Имя'),
+							table.xpath('.//Запись').map do |record|
 								extract_properties(record)
-							end							
-						]						
+							end
+						]
 					end
 				]
 			)
@@ -43,7 +42,7 @@ module Conversion1C
 
 		def extract_property(property)
 			[
-				property.attr('Имя'), 
+				property.attr('Имя'),
 				if property.attr('Тип') == "Число"
 					property.text.strip.to_i
 				elsif property.attr('Тип') == "Булево"

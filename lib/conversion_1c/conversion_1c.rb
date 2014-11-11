@@ -1,5 +1,5 @@
-require "conversion_1c/version"
-require "conversion_1c/conversion_object"
+require "version"
+require "conversion_object"
 
 module Conversion1C
 	class Conversion
