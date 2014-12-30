@@ -9,13 +9,13 @@ module Conversion1C
 	describe Conversion1C::ConversionObject do
 		describe '#initialize' do
 			it "set correct class name, rule name and nth for object" do
-				data = Nokogiri::XML('<Объект Нпп="1" Тип="СправочникСсылка.Employees" ИмяПравила="Employees"></Объект>')
-  				obj = ConversionObject.new(data)
+				data = Nokogiri::XML('<Объект Нпп="1" Тип="СправочникСсылка.Employees" ИмяПравила="Employees"></Объект>').child
+				obj = ConversionObject.new(data)
 
-  				expect(obj.class_name).to eq('СправочникСсылка.Employees')
-  				expect(obj.rule_name).to eq('Employees')
-  				expect(obj.nth).to eq(1)
-			end			
+				expect(obj.rule_name).to eq('Employees')
+				expect(obj.class_name).to eq('СправочникСсылка.Employees')
+				expect(obj.nth).to eq(1)
+			end
 		end
 
 		describe "#to_h" do
@@ -26,10 +26,10 @@ module Conversion1C
 					    <Ссылка Нпп="1">
 					      <Свойство Имя="{УникальныйИдентификатор}" Тип="Строка">
 					        <Значение>26608149-926e-11e3-93fc-40f2e908438b</Значение>
-					      </Свойство>					    
+					      </Свойство>
 					</Объект>
 					XML
-					)
+					).child
   				obj = ConversionObject.new(data)
   				expect(obj.to_h["guid"]).to eq('26608149-926e-11e3-93fc-40f2e908438b')
 			end
@@ -59,7 +59,7 @@ module Conversion1C
 				        </Свойство>
 					  </Объект>
 					OBJ
-					)
+					).child
   				obj = ConversionObject.new(data)
   				expect(obj.to_h['guid']).to eq("75e7c554-d1f7-11db-a0e0-0002b3e9aa0d")
   				expect(obj.to_h['id']).to eq(1992)
@@ -113,7 +113,7 @@ module Conversion1C
 						</Объект>
 					</ФайлОбмена>
 					OBJ
-					)
+					).child
 				first = data.xpath('//ФайлОбмена/Объект').first
 				obj = ConversionObject.new(first)
   				expect(obj.nth).to eq(7)
@@ -127,7 +127,7 @@ module Conversion1C
 			it 'return correct data for tables' do
 				data = Nokogiri::XML(
 					<<-XML
-					<Объект Нпп="4" Тип="СправочникСсылка.Clients" ИмяПравила="Clients"> 
+					<Объект Нпп="4" Тип="СправочникСсылка.Clients" ИмяПравила="Clients">
 					    <Свойство Имя="id" Тип="Строка">
 					      <Значение>00106</Значение>
 					    </Свойство>
@@ -159,25 +159,25 @@ module Conversion1C
 					        <Свойство Имя="way" Тип="Строка">
 					          <Значение>Телефон</Значение>
 					        </Свойство>
-					      </Запись>      
-					    </ТабличнаяЧасть>    
-					</Объект>  
+					      </Запись>
+					    </ТабличнаяЧасть>
+					</Объект>
 					XML
-				)
+				).child
 				conversion = ConversionObject.new(data)
-				hash = conversion.to_h				
+				hash = conversion.to_h
 				support_events = hash['support_events']
-				
+
 				expect(support_events).not_to be_empty
 				expect(support_events.size).to be_equal(2)
 
 				first_line = support_events[0]
-				
+
 				expect(first_line['kind']).to eq("Ответ на конкретный вопрос")
 				expect(first_line['date']).to eq(Time.parse('2014-07-07T00:00:00'))
 
 				second_line = support_events[1]
-				
+
 				expect(second_line['kind']).to eq("Заказ тематической подборки по возникшей проблеме")
 				expect(second_line['way']).to eq("Телефон")
 			end
@@ -186,37 +186,40 @@ module Conversion1C
 			it 'return correct data for multiple tables' do
 				data = Nokogiri::XML(
 					<<-XML
-					<Объект Нпп="4" Тип="СправочникСсылка.Clients" ИмяПравила="Clients"> 
+					<Объект Нпп="4" Тип="СправочникСсылка.Clients" ИмяПравила="Clients">
+							<Свойство Имя="text" Тип="Строка">
+								<Значение>Текст0</Значение>
+							</Свойство>
 					    <ТабличнаяЧасть Имя="table1">
-					      <Запись>					        
+					      <Запись>
 					        <Свойство Имя="text" Тип="Строка">
 					          <Значение>Текст1</Значение>
 					        </Свойство>
 					      </Запись>
-					      <Запись>					        
+					      <Запись>
 					        <Свойство Имя="text" Тип="Строка">
 					          <Значение>Текст2</Значение>
 					        </Свойство>
 					      </Запись>
-					    </ТабличнаяЧасть>    
+					    </ТабличнаяЧасть>
 					    <ТабличнаяЧасть Имя="table2">
-					      <Запись>					        
+					      <Запись>
 					        <Свойство Имя="text" Тип="Строка">
 					          <Значение>Текст3</Значение>
 					        </Свойство>
 					      </Запись>
-					      <Запись>					        
+					      <Запись>
 					        <Свойство Имя="text" Тип="Строка">
 					          <Значение>Текст4</Значение>
 					        </Свойство>
 					      </Запись>
-					    </ТабличнаяЧасть>    
-					</Объект>  
+					    </ТабличнаяЧасть>
+					</Объект>
 					XML
-				)
+				).child
 				conversion = ConversionObject.new(data)
 				hash = conversion.to_h
-				
+				expect(hash['text']).to eq("Текст0")
 				expect(hash['table1']).not_to be_empty
 				expect(hash['table1'].size).to be_equal(2)
 				expect(hash['table1'][0]['text']).to eq("Текст1")

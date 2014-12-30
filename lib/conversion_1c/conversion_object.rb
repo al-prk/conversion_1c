@@ -1,4 +1,5 @@
 require 'time'
+require 'pry'
 
 module Conversion1C
 	class ConversionObject
@@ -9,21 +10,19 @@ module Conversion1C
 
 		def initialize(data)
 			object = data
-
 			@nth = object.attr('Нпп').to_i
 			@class_name = object.attr('Тип')
 			@rule_name = object.attr('ИмяПравила')
-
 			@obj = {
-				"guid" => data.xpath('.//Ссылка/Свойство[@Имя = "{УникальныйИдентификатор}"][1]').text.strip
+				"guid" => data.xpath('Ссылка/Свойство[@Имя = "{УникальныйИдентификатор}"][1]').text.strip
 			}.merge(
 				extract_properties(data)
 			).merge(
 				Hash[
-					data.xpath('.//ТабличнаяЧасть').map do |table|
+					data.xpath('ТабличнаяЧасть').map do |table|
 						[
 							table.attr('Имя'),
-							table.xpath('.//Запись').map do |record|
+							table.xpath('Запись').map do |record|
 								extract_properties(record)
 							end
 						]
@@ -34,7 +33,7 @@ module Conversion1C
 
 		def extract_properties(object)
 			Hash[
-				object.xpath('.//Свойство').map do |property|
+				object.xpath('Свойство').map do |property|
 					extract_property(property)
 				end
 			]
